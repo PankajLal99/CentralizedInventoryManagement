@@ -12,8 +12,8 @@
         <th>Product</th>
         <th>Margin %</th>
         <th>Discount</th>
-        <th>Selling Price</th>
         <th>GST</th>
+        <th>Selling Price</th>
         <th>Actions</th>
       </tr>
     </thead>
@@ -24,8 +24,8 @@
           <td>{{ sale.purchase_product.product.name }}</td>
           <td>{{ sale.margin_percent }}</td>
           <td>{{ sale.discount }}</td>
-          <td>{{ sale.selling_price }}</td>
           <td>{{ sale.selling_gst }}</td>
+          <td>{{ sale.selling_price }}</td>
           <td>
             <a href="{% url 'purchase-product-sale-update' sale.id %}" class="btn btn-warning btn-sm">Edit</a>
             <a href="{% url 'purchase-product-sale-delete' sale.id %}" class="btn btn-danger btn-sm">Delete</a>

@@ -31,7 +31,7 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'vendor', 'category', 'sub_category', 'reorder_level', 'barcode')
+    list_display = ('id', 'name', 'vendor', 'category', 'sub_category', 'barcode')
     list_filter = ('category', 'sub_category', 'vendor')
     search_fields = ('name', 'barcode', 'vendor__name', 'category__name', 'sub_category__name')
 
@@ -82,7 +82,7 @@ class WarehouseAdmin(admin.ModelAdmin):
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display = ('id', 'warehouse', 'customer', 'gst', 'subtotal', 'total')
+    list_display = ('id', 'warehouse', 'customer', 'customer__gst_number', 'subtotal', 'total')
     list_filter = ('warehouse', 'customer')
     search_fields = ('id', 'warehouse__name', 'customer__name')
 
@@ -103,7 +103,7 @@ class SaleReturnAdmin(admin.ModelAdmin):
 
 @admin.register(Inventory)
 class InventoryAdmin(admin.ModelAdmin):
-    list_display = ('id', 'product', 'quantity_available', 'reorder_level', 'warehouse', 'last_updated')
+    list_display = ('id','warehouse', 'product', 'quantity_available', 'reorder_level', 'warehouse', 'last_updated')
     list_filter = ('warehouse', 'product')
     search_fields = ('product__name', 'warehouse__name')
 

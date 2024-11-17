@@ -27,7 +27,7 @@ class UnitForm(forms.ModelForm):
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['vendor', 'name', 'details', 'image', 'category', 'sub_category', 'reorder_level', 'unit']
+        fields = ['vendor', 'name', 'details', 'image', 'category', 'sub_category', 'unit']
 
 class PurchaseForm(forms.ModelForm):
     class Meta:
@@ -115,7 +115,11 @@ class PurchaseProductSaleForm(forms.ModelForm):
         purchase_price = instance.purchase_product.price
         margin = (instance.margin_percent / 100) * purchase_price
         instance.total_margin = margin
-        instance.selling_price = purchase_price + margin - (instance.discount or 0)
+        selling_price = purchase_price + margin - (instance.discount or 0)
+        if instance.selling_gst>0:
+            instance.selling_price = selling_price + (selling_price * (instance.selling_gst/100))
+        else:
+            instance.selling_price = selling_price
         if commit:
             instance.save()
         return instance
@@ -124,7 +128,7 @@ class PurchaseProductSaleForm(forms.ModelForm):
 class SaleForm(forms.ModelForm):
     class Meta:
         model = Sale
-        fields = ['warehouse', 'customer', 'gst']
+        fields = ['warehouse', 'customer']
 
 
 class SaleProductForm(forms.ModelForm):

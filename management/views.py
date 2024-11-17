@@ -266,7 +266,6 @@ def purchase_delete(request, pk):
         return redirect('purchase-list')
     return render(request, 'components/confirm_delete.html', {'object': purchase})
 
-
 # Customer Views
 def customer_create(request):
     if request.method == 'POST':
@@ -279,12 +278,10 @@ def customer_create(request):
 
     return render(request, 'customer/customer_form.html', {'form': form})
 
-
 # Customer List View
 def customer_list(request):
     customers = CustomerDetails.objects.all()
     return render(request, 'customer/customer_list.html', {'customers': customers})
-
 
 def customer_update(request, pk):
     customer = get_object_or_404(CustomerDetails, id=pk)
@@ -305,13 +302,12 @@ def customer_delete(request, pk):
         return redirect('customer-list')
     return render(request, 'components/confirm_delete.html', {'object': customer})
 
-
 # Warehouse Views
 def warehouse_list(request):
     warehouses = Warehouse.objects.all()
     return render(request, 'warehouse/warehouse_list.html', {'warehouses': warehouses})
 
-
+# Warehouse Create
 def warehouse_create(request):
     if request.method == 'POST':
         form = WarehouseForm(request.POST)
@@ -323,6 +319,7 @@ def warehouse_create(request):
 
     return render(request, 'warehouse/warehouse_form.html', {'form': form})
 
+# Warehouse Update
 def warehouse_update(request, pk):
     warehouse = get_object_or_404(Warehouse, id=pk)
     if request.method == 'POST':
@@ -335,7 +332,7 @@ def warehouse_update(request, pk):
 
     return render(request, 'warehouse/warehouse_form.html', {'form': form})
 
-
+# Warehouse Delete
 def warehouse_delete(request, pk):
     warehouse = get_object_or_404(Warehouse, id=pk)
     if request.method == 'POST':
@@ -350,7 +347,6 @@ def purchase_product_sale_list(request):
     sales = PurchaseProductSale.objects.all()
     return render(request, 'purchase_product_sale/purchase_product_sale_list.html', {'sales': sales})
 
-
 # Purchase Product Sale Create
 def purchase_product_sale_create(request):
     if request.method == 'POST':
@@ -361,7 +357,6 @@ def purchase_product_sale_create(request):
     else:
         form = PurchaseProductSaleForm()
     return render(request, 'purchase_product_sale/purchase_product_sale_form.html', {'form': form})
-
 
 # Purchase Product Sale Update
 def purchase_product_sale_update(request, pk):
@@ -375,7 +370,6 @@ def purchase_product_sale_update(request, pk):
         form = PurchaseProductSaleForm(instance=sale)
     return render(request, 'purchase_product_sale/purchase_product_sale_form.html', {'form': form})
 
-
 # Purchase Product Sale Delete
 def purchase_product_sale_delete(request, pk):
     sale = get_object_or_404(PurchaseProductSale, pk=pk)
@@ -384,12 +378,10 @@ def purchase_product_sale_delete(request, pk):
         return redirect('purchase-product-sale-list')
     return render(request, 'components/confirm_delete.html', {'object': sale})
 
-
 # Sale List
 def sale_list(request):
     sales = Sale.objects.all()
     return render(request, 'sale/sale_list.html', {'sales': sales})
-
 
 # Sale Create with Sale Products
 def sale_create(request):
@@ -409,8 +401,13 @@ def sale_create(request):
                     sale_product.sale = sale
                     sale_product.save()
                     sale.subtotal += sale_product.total
+                    update_inventory_on_sale(
+                        sale_product.purchase_product_sale.purchase_product.product,
+                        sale_product.quantity,
+                        sale.warehouse
+                    )
 
-            sale.total = sale.subtotal + (sale.subtotal * sale.gst / 100)
+            # sale.total = sale.subtotal + (sale.subtotal * sale.gst / 100)
             sale.save()
             return redirect('sale-list')
     else:
@@ -418,7 +415,6 @@ def sale_create(request):
         formset = SaleProductFormset(queryset=SaleProduct.objects.none())
 
     return render(request, 'sale/sale_form.html', {'sale_form': sale_form, 'formset': formset})
-
 
 # Sale Update
 def sale_update(request, pk):
@@ -431,13 +427,15 @@ def sale_update(request, pk):
             sale = sale_form.save(commit=False)
             sale.subtotal = 0
             for form in formset:
-                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                if form.cleaned_data.get('DELETE'):
+                    form.instance.delete()
+                elif form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                     sale_product = form.save(commit=False)
                     sale_product.sale = sale
                     sale_product.save()
                     sale.subtotal += sale_product.total
 
-            sale.total = sale.subtotal + (sale.subtotal * sale.gst / 100)
+            # sale.total = sale.subtotal + (sale.subtotal * sale.gst / 100)
             sale.save()
             return redirect('sale-list')
     else:
@@ -445,7 +443,6 @@ def sale_update(request, pk):
         formset = SaleProductFormset(queryset=sale.saleproduct_set.all())
 
     return render(request, 'sale/sale_form.html', {'sale_form': sale_form, 'formset': formset})
-
 
 # Sale Delete
 def sale_delete(request, pk):

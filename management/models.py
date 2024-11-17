@@ -46,7 +46,6 @@ class Product(models.Model):
     image = models.ImageField(upload_to='product_images/', null=True, blank=True)
     category = models.ForeignKey('Category', on_delete=models.CASCADE)
     sub_category = models.ForeignKey('SubCategory', on_delete=models.CASCADE)
-    reorder_level = models.PositiveIntegerField()
     unit = models.ForeignKey('Unit', on_delete=models.CASCADE)
     barcode = models.CharField(max_length=255, unique=True, blank=True)
 
@@ -140,7 +139,7 @@ class PurchaseProductSale(models.Model):
     selling_gst = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return f"Sale {self.purchase_product.product.name}"
+        return f"{self.purchase_product.product.name} {self.selling_price}"
 
 
 # Customer Details Model
@@ -157,7 +156,6 @@ class CustomerDetails(models.Model):
 class Sale(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     customer = models.ForeignKey(CustomerDetails, on_delete=models.CASCADE)
-    gst = models.DecimalField(max_digits=5, decimal_places=2)
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=12, decimal_places=2)
 
@@ -179,6 +177,12 @@ class SaleProduct(models.Model):
         if self.pk:  # Check if the record is being updated
             original = SaleProduct.objects.get(pk=self.pk)
             handle_sale_edit(original, self.quantity)
+        else:
+            update_inventory_on_sale(
+                        self.purchase_product_sale.purchase_product.product,
+                        self.quantity,
+                        self.sale.warehouse
+                    )
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

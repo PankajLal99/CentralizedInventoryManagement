@@ -10,7 +10,7 @@ def update_inventory_on_purchase(product, quantity, warehouse):
     inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=warehouse,
-        defaults={'quantity_available': 0, 'reorder_level': 10}  # Default reorder level
+        defaults={'quantity_available': 0, 'reorder_level': 2}  # Default reorder level
     )
     inventory.quantity_available += quantity
     inventory.save()
@@ -32,7 +32,7 @@ def update_inventory_on_transfer(product, quantity, source_warehouse, destinatio
     destination_inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=destination_warehouse,
-        defaults={'quantity_available': 0, 'reorder_level': 10}  # Default reorder level
+        defaults={'quantity_available': 0, 'reorder_level': 2}  # Default reorder level
     )
 
     # Update inventory quantities atomically
@@ -48,7 +48,7 @@ def update_inventory(product, warehouse, quantity_delta):
     inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=warehouse,
-        defaults={'quantity_available': 0, 'reorder_level': 10}
+        defaults={'quantity_available': 0, 'reorder_level': 2}
     )
     if inventory.quantity_available + quantity_delta < 0:
         raise ValidationError("Insufficient stock.")
@@ -113,8 +113,6 @@ def handle_sale_edit(sale_product, new_quantity):
         warehouse=sale_product.sale.warehouse,
         quantity_delta=-quantity_delta
     )
-    sale_product.quantity = new_quantity
-    sale_product.save()
 
 def handle_purchase_return(purchase_product, return_quantity):
     """Handle inventory update for a purchase return."""
