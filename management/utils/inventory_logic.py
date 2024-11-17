@@ -1,12 +1,13 @@
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from datetime import date
+from management import models as md
 
 # TODO : Whole Logic Test is pending and in to be done 
 
 def update_inventory_on_purchase(product, quantity, warehouse):
     """Updates inventory when a purchase is made."""
-    inventory, created = Inventory.objects.get_or_create(
+    inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=warehouse,
         defaults={'quantity_available': 0, 'reorder_level': 10}  # Default reorder level
@@ -16,7 +17,7 @@ def update_inventory_on_purchase(product, quantity, warehouse):
 
 def update_inventory_on_sale(product, quantity, warehouse):
     """Updates inventory when a sale is made."""
-    inventory = Inventory.objects.get(product=product, warehouse=warehouse)
+    inventory = md.Inventory.objects.get(product=product, warehouse=warehouse)
     if inventory.quantity_available < quantity:
         raise ValidationError("Insufficient stock for the sale.")
     inventory.quantity_available -= quantity
@@ -24,11 +25,11 @@ def update_inventory_on_sale(product, quantity, warehouse):
 
 def update_inventory_on_transfer(product, quantity, source_warehouse, destination_warehouse):
     """Updates inventory for stock transfers."""
-    source_inventory = Inventory.objects.get(product=product, warehouse=source_warehouse)
+    source_inventory = md.Inventory.objects.get(product=product, warehouse=source_warehouse)
     if source_inventory.quantity_available < quantity:
         raise ValidationError("Insufficient stock in the source warehouse.")
 
-    destination_inventory, created = Inventory.objects.get_or_create(
+    destination_inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=destination_warehouse,
         defaults={'quantity_available': 0, 'reorder_level': 10}  # Default reorder level
@@ -44,7 +45,7 @@ def update_inventory_on_transfer(product, quantity, source_warehouse, destinatio
 
 def update_inventory(product, warehouse, quantity_delta):
     """Update inventory for a specific product in a warehouse."""
-    inventory, created = Inventory.objects.get_or_create(
+    inventory, created = md.Inventory.objects.get_or_create(
         product=product,
         warehouse=warehouse,
         defaults={'quantity_available': 0, 'reorder_level': 10}
@@ -58,7 +59,7 @@ def handle_purchase_deletion(purchase_product):
     """Adjust inventory when a purchase is deleted."""
     update_inventory(
         product=purchase_product.product,
-        warehouse=purchase_product.warehouse,
+        warehouse=purchase_product.purchase.warehouse,
         quantity_delta=-purchase_product.quantity
     )
 
@@ -97,11 +98,9 @@ def handle_purchase_edit(purchase_product, new_quantity):
     # Restore original quantity and apply the new change
     update_inventory(
         product=purchase_product.product,
-        warehouse=purchase_product.warehouse,
+        warehouse=purchase_product.purchase.warehouse,
         quantity_delta=quantity_delta
     )
-    purchase_product.quantity = new_quantity
-    purchase_product.save()
 
 def handle_sale_edit(sale_product, new_quantity):
     """Handle inventory update when a sale is edited."""

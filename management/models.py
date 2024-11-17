@@ -2,7 +2,6 @@ import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
 from management.utils.inventory_logic import *
-# inventory_logic import handle_purchase_edit, handle_sale_edit, handle_sale, handle_purchase_deletion, update_inventory_on_transfer, handle_stock_transfer, handle_stock_transfer_edit
 
 # Vendor Model
 class Vendor(models.Model):
@@ -81,6 +80,7 @@ class Warehouse(models.Model):
 # Purchase Model
 class Purchase(models.Model):
     purchase_date = models.DateField()
+    warehouse = models.ForeignKey(Warehouse,on_delete=models.CASCADE)
     vendor_invoice_number = models.CharField(max_length=50, unique=True)
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
     total = models.DecimalField(max_digits=12, decimal_places=2)
@@ -92,7 +92,6 @@ class Purchase(models.Model):
 # Purchase Products Model
 class PurchaseProduct(models.Model):
     purchase = models.ForeignKey(Purchase, on_delete=models.CASCADE)
-    warehouse = models.ForeignKey(Warehouse,on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -100,12 +99,18 @@ class PurchaseProduct(models.Model):
     total = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
-        return f"{self.product.name} - {self.purchase.id}"
+        return f"{self.product.name} - {self.price} - {self.purchase.purchase_date}"
     
     def save(self, *args, **kwargs):
         if self.pk:  # Check if the record is being updated
             original = PurchaseProduct.objects.get(pk=self.pk)
             handle_purchase_edit(original, self.quantity)
+        else:
+            update_inventory(
+                        product=self.product,
+                        warehouse=self.purchase.warehouse,
+                        quantity_delta=self.quantity
+                    )
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):

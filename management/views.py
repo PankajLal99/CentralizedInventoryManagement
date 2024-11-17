@@ -218,7 +218,7 @@ def purchase_create(request):
                     update_inventory(
                         product=purchase_product.product,
                         warehouse=purchase.warehouse,
-                        quantity_delta=purchase.quantity
+                        quantity_delta=purchase_product.quantity
                     )
 
             return redirect('purchase-list')  # Redirect to purchase list after creation
@@ -241,7 +241,6 @@ def purchase_update(request, pk):
         if purchase_form.is_valid() and formset.is_valid():
             purchase = purchase_form.save(commit=False)
             purchase.save()
-
             for form in formset:
                 if form.cleaned_data.get('DELETE'):
                     form.instance.delete()

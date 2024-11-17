@@ -32,7 +32,7 @@ class ProductForm(forms.ModelForm):
 class PurchaseForm(forms.ModelForm):
     class Meta:
         model = Purchase
-        fields = ['vendor', 'vendor_invoice_number', 'purchase_date', 'total']
+        fields = ['vendor','warehouse','vendor_invoice_number', 'purchase_date', 'total']
         widgets = {
             'purchase_date': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -40,7 +40,7 @@ class PurchaseForm(forms.ModelForm):
 class PurchaseProductForm(forms.ModelForm):
     class Meta:
         model = PurchaseProduct
-        fields = ['product', 'quantity', 'price', 'gst_percent']
+        fields = ['product','quantity', 'price', 'gst_percent']
         widgets = {
             'quantity': forms.NumberInput(attrs={'min': 1}),
             'price': forms.NumberInput(attrs={'step': '0.01'}),
