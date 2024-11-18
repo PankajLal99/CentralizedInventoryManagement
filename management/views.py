@@ -215,11 +215,6 @@ def purchase_create(request):
                 if purchase_product:
                     purchase_product.purchase = purchase  # Associate with the newly created Purchase
                     purchase_product.save()
-                    update_inventory(
-                        product=purchase_product.product,
-                        warehouse=purchase.warehouse,
-                        quantity_delta=purchase_product.quantity
-                    )
 
             return redirect('purchase-list')  # Redirect to purchase list after creation
 
@@ -452,6 +447,7 @@ def sale_delete(request, pk):
         return redirect('sale-list')
     return render(request, 'components/confirm_delete.html', {'object': sale})
 
+# Purchase Return
 def purchase_return(request, purchase_id):
     purchase = get_object_or_404(PurchaseProduct, pk=purchase_id)
     if request.method == 'POST':
@@ -460,6 +456,7 @@ def purchase_return(request, purchase_id):
         return HttpResponse({'status': 'success', 'message': 'Purchase return processed.'})
     return render(request, 'purchase_return.html', {'purchase': purchase}) # TODO
 
+# Sale Return
 def sale_return(request, sale_id):
     sale = get_object_or_404(SaleProduct, pk=sale_id)
     if request.method == 'POST':
@@ -467,3 +464,50 @@ def sale_return(request, sale_id):
         handle_sale_return(sale, return_quantity)
         return HttpResponse({'status': 'success', 'message': 'Sale return processed.'})
     return render(request, 'sale_return.html', {'sale': sale}) # TODO
+
+# Stock Transfer List
+def stock_transfer_list(request):
+    transfers = StockTransfer.objects.all().order_by('-transfer_date')
+    return render(request, 'stock_transfer/stock_transfer_list.html', {'page_obj': transfers})
+
+# Stock Transfer Create
+def stock_transfer_create(request):
+    if request.method == 'POST':
+        form = StockTransferForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                # messages.success(request, "Stock transfer created successfully.")
+                return redirect('stock-transfer-list')
+            except ValidationError as e:
+                print(str(e))
+                # messages.error(request, str(e))
+    else:
+        form = StockTransferForm()
+    return render(request, 'stock_transfer/stock_transfer_form.html', {'form': form})
+
+# Stock Transfer Update/Edit
+def stock_transfer_update(request, pk):
+    transfer = get_object_or_404(StockTransfer, pk=pk)
+    if request.method == 'POST':
+        form = StockTransferForm(request.POST, instance=transfer)
+        if form.is_valid():
+            try:
+                form.save()
+                # messages.success(request, "Stock transfer updated successfully.")
+                return redirect('stock-transfer-list')
+            except ValidationError as e:
+                print(str(e))
+                # messages.error(request, str(e))
+    else:
+        form = StockTransferForm(instance=transfer)
+    return render(request, 'stock_transfer/stock_transfer_form.html', {'form': form, 'transfer': transfer})
+
+# Stock Transfer Delete
+def stock_transfer_delete(request, pk):
+    transfer = get_object_or_404(StockTransfer, pk=pk)
+    if request.method == 'POST':
+        transfer.delete()
+        # messages.success(request, "Stock transfer deleted successfully.")
+        return redirect('stock-transfer-list')
+    return render(request, 'components/confirm_delete.html', {'object': transfer})

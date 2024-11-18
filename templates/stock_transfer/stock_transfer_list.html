@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Stock Transfer{% endblock title %}
+{% block content %}
+<h1>Stock Transfers</h1>
+<a href="{% url 'stock-transfer-create' %}">Create New Transfer</a>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Source Warehouse</th>
+            <th>Destination Warehouse</th>
+            <th>Quantity</th>
+            <th>Transfer Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transfer in page_obj %}
+        <tr>
+            <td>{{ transfer.product.name }}</td>
+            <td>{{ transfer.source_warehouse.name }}</td>
+            <td>{{ transfer.destination_warehouse.name }}</td>
+            <td>{{ transfer.quantity }}</td>
+            <td>{{ transfer.transfer_date }}</td>
+            <td>
+                <a href="{% url 'stock-transfer-update' transfer.pk %}">Edit</a>
+                <a href="{% url 'stock-transfer-delete' transfer.pk %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div>
+    {{ page_obj.paginator.num_pages }} pages
+</div>
+{% endblock content %}

@@ -236,14 +236,14 @@ class StockTransfer(models.Model):
         if self.pk:  # Check if the record is being updated
             original = StockTransfer.objects.get(pk=self.pk)
             handle_stock_transfer_edit(original, self.quantity)
-
-        # Update inventory on save
-        update_inventory_on_transfer(
-            product=self.product,
-            quantity=self.quantity,
-            source_warehouse=self.source_warehouse,
-            destination_warehouse=self.destination_warehouse
-        )
+        else:
+            # Update inventory on save
+            update_inventory_on_transfer(
+                product=self.product,
+                quantity=self.quantity,
+                source_warehouse=self.source_warehouse,
+                destination_warehouse=self.destination_warehouse
+            )
 
         super().save(*args, **kwargs)
     

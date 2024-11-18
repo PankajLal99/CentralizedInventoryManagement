@@ -9,6 +9,9 @@
 {% url 'customer-list' as customer_list_url %}
 {% url 'sale-list' as sale_list_url %}
 {% url 'purchase-product-sale-list' as purchase_product_sale_list_url %}
+{% url 'stock-transfer-list' as stock_transfer_list_url %}
+
+
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <a class="navbar-brand" href="{% url 'home' %}">Navbar</a>
@@ -41,11 +44,14 @@
         <li class="nav-item {% if request.path == customer_list_url %} active {% endif %}">
           <a class="nav-link" href="{% url 'customer-list' %}">Customer Details</a>
         </li>
+        <li class="nav-item {% if request.path == purchase_product_sale_list_url %} active {% endif %}">
+          <a class="nav-link" href="{% url 'purchase-product-sale-list' %}">Purchase Product Sale</a>
+        </li>
         <li class="nav-item {% if request.path == sale_list_url %} active {% endif %}">
           <a class="nav-link" href="{% url 'sale-list' %}">Sales</a>
         </li>
-        <li class="nav-item {% if request.path == purchase_product_sale_list_url %} active {% endif %}">
-          <a class="nav-link" href="{% url 'purchase-product-sale-list' %}">Purchase Product Sale</a>
+        <li class="nav-item {% if request.path == stock_transfer_list_url %} active {% endif %}">
+          <a class="nav-link" href="{% url 'stock-transfer-list' %}">Stock Transfer</a>
         </li>
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">

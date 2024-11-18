@@ -43,4 +43,8 @@ urlpatterns = [
     path('sales/create/', sale_create, name='sale-create'),
     path('sales/<int:pk>/update/', sale_update, name='sale-update'),
     path('sales/<int:pk>/delete/', sale_delete, name='sale-delete'),
+    path('stock-transfers/', stock_transfer_list, name='stock-transfer-list'),
+    path('stock-transfers/create/', stock_transfer_create, name='stock-transfer-create'),
+    path('stock-transfers/<int:pk>/update/', stock_transfer_update, name='stock-transfer-update'),
+    path('stock-transfers/<int:pk>/delete/', stock_transfer_delete, name='stock-transfer-delete'),
 ]

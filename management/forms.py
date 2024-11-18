@@ -146,3 +146,11 @@ class SaleProductForm(forms.ModelForm):
         if commit:
             instance.save()
         return instance
+    
+class StockTransferForm(forms.ModelForm):
+    class Meta:
+        model = StockTransfer
+        fields = ['source_warehouse', 'destination_warehouse', 'product', 'quantity', 'transfer_date', 'remarks']
+        widgets = {
+            'transfer_date': forms.DateInput(attrs={'type': 'date'}),
+        }

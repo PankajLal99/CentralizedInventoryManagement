@@ -145,16 +145,17 @@ def handle_stock_transfer_edit(stock_transfer, new_quantity):
     original_quantity = stock_transfer.quantity
     quantity_delta = new_quantity - original_quantity
 
+    if quantity_delta == 0:
+        return  
     # Restore original transfer and apply the new change
     update_inventory(
         product=stock_transfer.product,
         warehouse=stock_transfer.source_warehouse,
-        quantity_delta=quantity_delta
+        quantity_delta=-quantity_delta  # Subtract more if increasing, add back if decreasing
     )
+
     update_inventory(
         product=stock_transfer.product,
         warehouse=stock_transfer.destination_warehouse,
-        quantity_delta=-quantity_delta
+        quantity_delta=quantity_delta  # Add more if increasing, subtract if decreasing
     )
-    stock_transfer.quantity = new_quantity
-    stock_transfer.save()
