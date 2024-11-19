@@ -511,3 +511,13 @@ def stock_transfer_delete(request, pk):
         # messages.success(request, "Stock transfer deleted successfully.")
         return redirect('stock-transfer-list')
     return render(request, 'components/confirm_delete.html', {'object': transfer})
+
+# Print Invoice
+def print_invoice(request,pk):
+    sales = get_object_or_404(Sale,pk=pk)
+    sales_product = sales.saleproduct_set.all()
+    context = {
+        'sales':sales,
+        'sale_products':sales_product,
+    }
+    return render(request,'components/print_invoice.html',context)

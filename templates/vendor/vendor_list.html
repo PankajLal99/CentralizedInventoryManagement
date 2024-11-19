@@ -2,14 +2,30 @@
 {% block title %}Vendor List{% endblock title %}
 {% block content %}
   <h2>Vendor List</h2>
-  <a href="{% url 'vendor-create' %}">Add New Vendor</a>
-  <ul>
-    {% for vendor in vendors %}
-      <li>
-        {{ vendor.name }} ({{ vendor.status }}) - 
-        <a href="{% url 'vendor-update' vendor.pk %}">Edit</a> | 
-        <a href="{% url 'vendor-delete' vendor.pk %}">Delete</a>
-      </li>
-    {% endfor %}
-  </ul>
+  <a href="{% url 'vendor-create' %}" class="btn btn-primary">Add New Vendor</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>GST</th>
+        <th>Details</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for vendor in vendors %}
+      <tr>
+        <td>{{ vendor.name }}</td>
+        <td>{{ vendor.gst }}</td>
+        <td>{{ vendor.details }}</td>
+        <td>{{ vendor.status }}</td>
+        <td>
+          <a href="{% url 'vendor-update' vendor.pk %}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{% url 'vendor-delete' vendor.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

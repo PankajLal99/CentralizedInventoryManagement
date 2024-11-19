@@ -124,8 +124,6 @@ def handle_purchase_return(purchase_product, return_quantity):
         warehouse=purchase_product.warehouse,
         quantity_delta=-return_quantity
     )
-    purchase_product.quantity -= return_quantity
-    purchase_product.save()
 
 def handle_sale_return(sale_product, return_quantity):
     """Handle inventory update for a sale return."""
@@ -133,12 +131,10 @@ def handle_sale_return(sale_product, return_quantity):
         raise ValidationError("Return quantity exceeds sold quantity.")
 
     update_inventory(
-        product=sale_product.purchase_product_sale.purchase_product.product,
+        product=sale_product.product,
         warehouse=sale_product.sale.warehouse,
         quantity_delta=return_quantity
     )
-    sale_product.quantity -= return_quantity
-    sale_product.save()
 
 def handle_stock_transfer_edit(stock_transfer, new_quantity):
     """Handle inventory update when a stock transfer is edited."""

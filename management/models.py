@@ -133,10 +133,12 @@ class PurchaseReturn(models.Model):
 class PurchaseProductSale(models.Model):
     purchase_product = models.ForeignKey(PurchaseProduct, on_delete=models.CASCADE)
     margin_percent = models.DecimalField(max_digits=5, decimal_places=2)
-    total_margin = models.DecimalField(max_digits=12, decimal_places=2)
+    gst_percent = models.DecimalField(max_digits=5, decimal_places=2)
     discount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    selling_price = models.DecimalField(max_digits=12, decimal_places=2)
+    total_margin = models.DecimalField(max_digits=12, decimal_places=2)
     selling_gst = models.DecimalField(max_digits=5, decimal_places=2)
+    sub_selling_price = models.DecimalField(max_digits=5, decimal_places=2)
+    selling_price = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):
         return f"{self.purchase_product.product.name} {self.selling_price}"
@@ -156,8 +158,10 @@ class CustomerDetails(models.Model):
 class Sale(models.Model):
     warehouse = models.ForeignKey(Warehouse, on_delete=models.CASCADE)
     customer = models.ForeignKey(CustomerDetails, on_delete=models.CASCADE)
-    subtotal = models.DecimalField(max_digits=12, decimal_places=2)
-    total = models.DecimalField(max_digits=12, decimal_places=2)
+    sales_date = models.DateField()
+    sub_total = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
+    gst_total = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
+    total = models.DecimalField(max_digits=12, decimal_places=2,default=0.00)
 
     def __str__(self):
         return f"Sale {self.id}"
@@ -168,6 +172,8 @@ class SaleProduct(models.Model):
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
     purchase_product_sale = models.ForeignKey(PurchaseProductSale, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
+    sub_total = models.DecimalField(max_digits=12, decimal_places=2)
+    gst_total = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self):

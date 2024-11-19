@@ -103,11 +103,17 @@ class WarehouseForm(forms.ModelForm):
 class PurchaseProductSaleForm(forms.ModelForm):
     class Meta:
         model = PurchaseProductSale
-        fields = ['purchase_product', 'margin_percent', 'discount', 'selling_gst']
+        fields = ['purchase_product', 'margin_percent', 'discount', 'gst_percent']
+        labels = {
+            'discount':'Discount %',
+            'margin_percent':'Margin %',
+            'gst_percent':'GST %',
+
+        }
         widgets = {
             'margin_percent': forms.NumberInput(attrs={'step': '0.01'}),
             'discount': forms.NumberInput(attrs={'step': '0.01'}),
-            'selling_gst': forms.NumberInput(attrs={'step': '0.01'}),
+            'gst_percent': forms.NumberInput(attrs={'step': '0.01'}),
         }
 
     def save(self, commit=True):
@@ -115,20 +121,51 @@ class PurchaseProductSaleForm(forms.ModelForm):
         purchase_price = instance.purchase_product.price
         margin = (instance.margin_percent / 100) * purchase_price
         instance.total_margin = margin
-        selling_price = purchase_price + margin - (instance.discount or 0)
-        if instance.selling_gst>0:
-            instance.selling_price = selling_price + (selling_price * (instance.selling_gst/100))
+        selling_price = purchase_price + margin
+        if instance.gst_percent>0:
+            selling_gst = (selling_price * (instance.gst_percent/100))
         else:
-            instance.selling_price = selling_price
+            selling_gst = 0
+        instance.selling_gst = selling_gst
+        instance.sub_selling_price = selling_price
+        instance.selling_price = selling_price + selling_gst
         if commit:
             instance.save()
         return instance
 
 
 class SaleForm(forms.ModelForm):
+    customer_name = forms.CharField(max_length=255, label='Customer Name')
+    gst_number = forms.CharField(max_length=15, required=False, label='GST Number')
+    mobile = forms.CharField(max_length=15, label='Mobile')
+    details = forms.CharField(widget=forms.Textarea, required=False, label='Details')
+
     class Meta:
         model = Sale
-        fields = ['warehouse', 'customer']
+        fields = ['warehouse','sales_date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:  # Check if editing an existing instance
+            self.fields['customer_name'].initial = self.instance.customer.name
+            self.fields['gst_number'].initial = self.instance.customer.gst_number
+            self.fields['mobile'].initial = self.instance.customer.mobile
+            self.fields['details'].initial = self.instance.customer.details
+
+    def save(self, commit=True):
+        sale = super().save(commit=False)
+        customer, created = CustomerDetails.objects.get_or_create(
+            gst_number=self.cleaned_data['gst_number'],
+            defaults={
+                'name': self.cleaned_data['customer_name'],
+                'mobile': self.cleaned_data['mobile'],
+                'details': self.cleaned_data['details']
+            }
+        )
+        sale.customer = customer
+        if commit:
+            sale.save()
+        return sale
 
 
 class SaleProductForm(forms.ModelForm):
@@ -142,11 +179,30 @@ class SaleProductForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super().save(commit=False)
         selling_price = instance.purchase_product_sale.selling_price
+        sub_selling_price = instance.purchase_product_sale.sub_selling_price
+        selling_gst = instance.purchase_product_sale.selling_gst
+        instance.sub_total = sub_selling_price * instance.quantity
+        instance.gst_total = selling_gst * instance.quantity
         instance.total = selling_price * instance.quantity
         if commit:
             instance.save()
+            self.update_sale_totals(instance.sale)
         return instance
     
+    def update_sale_totals(self, sale):
+        # Calculate new subtotal and total
+        sale.sub_total = sum(item.sub_total for item in sale.saleproduct_set.all())
+        sale.gst_total = sum(item.gst_total for item in sale.saleproduct_set.all())
+        sale.total = sum(item.total for item in sale.saleproduct_set.all())
+        
+        sale.save()
+
+    def delete(self, commit=True):
+        instance = self.instance
+        sale = instance.sale  # Reference to the Sale instance before deletion
+        super().delete(commit)
+        # Update totals after deletion
+        self.update_sale_totals(sale)
 class StockTransferForm(forms.ModelForm):
     class Meta:
         model = StockTransfer

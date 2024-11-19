@@ -1,0 +1,161 @@
+<html>
+  <head>
+    <style>
+      body {
+        font-family: "Verdana";
+        margin: 0;
+        padding: 0;
+        width: 72mm; /* Set body width to 72mm */
+      }
+      .center {
+        text-align: center;
+      }
+      @media print {
+        .btn {
+          display: none;
+        }
+
+        .tble {
+          -webkit-print-color-adjust: exact;
+        }
+        @page {
+          size: 72mm 260mm;
+          margin: 10px;
+        }
+      }
+
+      @media screen {
+        .btn {
+          display: block;
+        }
+      }
+
+      table,
+      th,
+      td {
+        border: 1px solid #ddd;; /* Remove border for a cleaner look */
+        font-family: "verdana"; /* Monospaced font */
+        color: #000; /* Dark text color */
+        padding: 5px; /* Adjust padding to reduce space */
+        margin: 0; /* Remove margin */
+        
+      }
+
+      th {
+        font-weight: bolder; /* Bold header text */
+        font-size: 15px; /* Larger font for headers */
+      }
+
+      td {
+        font-weight: bold; /* Bold text for data cells */
+        font-size: 14px; /* Adjust font size as needed */
+      }
+
+      .tble {
+        width: 100%; /* Ensure the table takes full width */
+        border-spacing: 0; /* Remove spacing between cells */
+      }
+      .tblebill {
+        width: 175%;
+      }
+    
+      .tblebill th {
+        width: auto; /* Adjust or set specific widths if necessary */
+      }
+
+      .tblebill td {
+        width: auto; /* Allow content to determine the width */
+      }
+      .tblsummry {
+        table-layout: auto;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body id="printarea">
+    <table class="tble">
+    <thead>
+    </thead>
+    <tbody>
+      <tr>
+        <th colspan="5" colspan="5">SATPURA WORKERS SOCIETY</th>
+      </tr>
+      <tr>
+        <th colspan="5">PARYATAK SEVA KENDRA</th>
+      </tr>
+      <tr>
+        <th colspan="5">MADHAI</th>
+      </tr>
+      <tr>
+        <th colspan="5">GSTIN : 23ABOAS5403R1ZW</th>
+      </tr>
+      <tr>
+        <th colspan="5">INVOICE</th>
+      </tr>
+      <tr>
+        <td colspan="5">=======================================</td>
+      </tr>
+      <tr>
+        <td colspan="5">Invoice No. {{sales.id}}</td>
+      </tr>
+      <tr>
+        <td colspan="5">Date: {{sales.sales_date}}</td>
+      </tr>
+      <tr>
+        <td colspan="5">Customer Name: {{sales.customer.name}}</td>
+      </tr>
+      {% if sales.customer.gst_number %}
+      <tr>
+        <td colspan="5">Customer GST: {{sales.customer.gst_number}}</td>
+      </tr>
+      {% endif %}
+      <tr>
+        <td colspan="5">
+          Customer Details: {{sales.customer.details}} |
+          {{sales.customer.mobile}}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="5">=======================================</td>
+      </tr>
+      <tr>
+        <th>Product</th>
+        <th class="center">Qty</th>
+        {% if sales_product.purchase_product_sale.discount %}
+          <th class="center">Discount</th>
+        {% endif %}
+        <th class="center">GST</th>
+        <th class="center">Sub Total</th>
+      </tr>
+      {% for sales_product in sale_products %}
+      <tr>
+        <td>{{sales_product.purchase_product_sale.purchase_product.product}}</td>
+        <td class="center">{{sales_product.quantity}}</td>
+        {% if sales_product.purchase_product_sale.discount %}
+          <td class="center">{{sales_product.purchase_product_sale.discount}}%</td>
+        {% endif %}
+        <td class="center">{{sales_product.purchase_product_sale.gst_percent|floatformat:0 }}%</td>
+        <td style="text-align: end;">{{sales_product.sub_total|floatformat:2}}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td colspan="5">=======================================</td>
+      </tr>
+      <tr>
+        <td colspan="3">Total GST</td>
+        <td style="text-align: end;">{{sales.gst_total|floatformat:2}}</td>
+      </tr>
+      <tr>
+        <td colspan="3">Total</td>
+        <td style="text-align: end;">Rs {{ sales.total|floatformat:2 }}</td>
+      </tr>
+      <tr>
+        <th colspan="5">ALL PRICES ARE GST INCLUSIVE</th>
+      </tr>
+      <tr>
+        <th colspan="5">Thank you!! Shop Again.</th>
+      </tr>
+    </tbody>
+    </table>
+  </body>
+</html>

@@ -4,13 +4,26 @@
 
 {% block content %}
   <h1>Sub-Category List</h1>
-  <a href="{% url 'subcategory-create' %}">Create New Sub-Category</a>
-  <ul>
-    {% for subcategory in subcategories %}
-      <li>{{ subcategory.name }} - {{ subcategory.category.name }} 
-          <a href="{% url 'subcategory-update' subcategory.pk %}">Edit</a>
-          <a href="{% url 'subcategory-delete' subcategory.pk %}">Delete</a>
-      </li>
-    {% endfor %}
-  </ul>
+  <a href="{% url 'subcategory-create' %}" class="btn btn-primary">Create New Sub-Category</a>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Parent Category</th>
+        <th>Name</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for subcategory in subcategories %}
+      <tr>
+        <td>{{ subcategory.category.name }}</td>
+        <td>{{ subcategory.name }}</td>
+        <td>
+          <a href="{% url 'subcategory-update' subcategory.pk %}" class="btn btn-warning btn-sm">Edit</a>
+          <a href="{% url 'subcategory-delete' subcategory.pk %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table> ̑
 {% endblock %}

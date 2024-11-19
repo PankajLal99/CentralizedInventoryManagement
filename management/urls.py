@@ -47,4 +47,6 @@ urlpatterns = [
     path('stock-transfers/create/', stock_transfer_create, name='stock-transfer-create'),
     path('stock-transfers/<int:pk>/update/', stock_transfer_update, name='stock-transfer-update'),
     path('stock-transfers/<int:pk>/delete/', stock_transfer_delete, name='stock-transfer-delete'),
+    # PRINTING
+    path('print-invoice/<int:pk>',print_invoice,name='print-invoice')
 ]
