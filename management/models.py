@@ -6,7 +6,7 @@ from management.utils.inventory_logic import *
 # Vendor Model
 class Vendor(models.Model):
     name = models.CharField(max_length=255)
-    gst = models.CharField(max_length=15)
+    gst = models.CharField(max_length=15,blank=True, null=True)
     details = models.TextField(null=True, blank=True)
     status = models.BooleanField(default=True)
 
@@ -192,6 +192,7 @@ class SaleProduct(models.Model):
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        print("CALLED")
         handle_sale(self, is_deletion=True)
         super().delete(*args, **kwargs)
 
